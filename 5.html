@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="uk" class="h-full bg-slate-900 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Інтерактивна Лабораторія Комп'ютерних Мереж (5 клас)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .font-heading {
+            font-family: 'Comfortaa', cursive;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .pulse-glow {
+            animation: pulse-glow 2s infinite alternate;
+        }
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 10px rgba(59, 130, 246, 0.4); }
+            100% { box-shadow: 0 0 25px rgba(59, 130, 246, 0.8); }
+        }
+        canvas {
+            touch-action: none;
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col overflow-x-hidden selection:bg-blue-500 selection:text-white">
+
+    <header class="bg-slate-800/90 border-b border-slate-700 sticky top-0 z-50 backdrop-blur">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center text-xl text-white shadow-lg shadow-blue-500/30">
+                    <i class="fa-solid fa-network-wired"></i>
+                </div>
+                <div>
+                    <h1 class="font-heading font-bold text-lg md:text-xl text-white tracking-wide">Мережева Лабораторія</h1>
+                    <p class="text-xs text-blue-400 font-medium">Інформатика 5 клас • Розділ II</p>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="flex items-center bg-slate-900/80 p-1.5 rounded-xl border border-slate-700/60 overflow-x-auto max-w-full">
+                <button onclick="switchTab('topologies')" id="tab-topologies" class="nav-btn px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all flex items-center gap-2 bg-blue-600 text-white shadow-md">
+                    <i class="fa-solid fa-diagram-project"></i>
+                    <span>1. Топології</span>
+                </button>
+                <button onclick="switchTab('interaction')" id="tab-interaction" class="nav-btn px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium text-slate-300 hover:text-white transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-server"></i>
+                    <span>2. Сервер та Робоча група</span>
+                </button>
+                <button onclick="switchTab('builder')" id="tab-builder" class="nav-btn px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium text-slate-300 hover:text-white transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-cubes"></i>
+                    <span>3. Конструктор Класу</span>
+                </button>
+                <button onclick="switchTab('security')" id="tab-security" class="nav-btn px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium text-slate-300 hover:text-white transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>4. Безпека & Діагностика</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 gap-6">
+
+        <!-- ================= TAB 1: TOPOLOGIES SIMULATOR ================= -->
+        <section id="sec-topologies" class="tab-content grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Controls & Theory -->
+            <div class="glass-panel p-5 rounded-2xl flex flex-col justify-between gap-4 border border-slate-700">
+                <div>
+                    <span class="inline-block px-2.5 py-1 text-xs font-bold rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 mb-3">
+                        <i class="fa-solid fa-book-open mr-1"></i> Схема (Топологія) мережі
+                    </span>
+                    <h2 class="text-xl font-heading font-bold text-white mb-2">Як з'єднані комп'ютери?</h2>
+                    <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-4">
+                        Спосіб поєднання комп'ютерів у мережу називають **топологією**. Оберіть топологію, спробуйте передати файл та випробуйте стійкість мережі до поломок!
+                    </p>
+
+                    <!-- Topology Selectors -->
+                    <div class="space-y-2 mb-5">
+                        <label class="block text-xs font-semibold uppercase text-slate-400 tracking-wider">Оберіть топологію:</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="setTopology('star')" id="btn-topo-star" class="topo-select-btn p-3 rounded-xl border border-blue-500 bg-blue-600/30 text-white font-semibold text-xs flex flex-col items-center gap-1 transition">
+                                <i class="fa-solid fa-star text-lg text-yellow-400"></i>
+                                <span>«Зірка»</span>
+                            </button>
+                            <button onclick="setTopology('bus')" id="btn-topo-bus" class="topo-select-btn p-3 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 font-semibold text-xs flex flex-col items-center gap-1 transition hover:bg-slate-700">
+                                <i class="fa-solid fa-grip-lines text-lg text-blue-400"></i>
+                                <span>«Шина»</span>
+                            </button>
+                            <button onclick="setTopology('ring')" id="btn-topo-ring" class="topo-select-btn p-3 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 font-semibold text-xs flex flex-col items-center gap-1 transition hover:bg-slate-700">
+                                <i class="fa-solid fa-circle-notch text-lg text-emerald-400"></i>
+                                <span>«Кільце»</span>
+                            </button>
+                            <button onclick="setTopology('tree')" id="btn-topo-tree" class="topo-select-btn p-3 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 font-semibold text-xs flex flex-col items-center gap-1 transition hover:bg-slate-700">
+                                <i class="fa-solid fa-sitemap text-lg text-purple-400"></i>
+                                <span>«Дерево»</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Actions -->
+                    <div class="space-y-3">
+                        <button onclick="sendPacketTopology()" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-sm shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 transition active:scale-95">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>Надіслати файл (ПК 1 ➔ ПК 4)</span>
+                        </button>
+
+                        <div class="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-200 text-xs">
+                            <i class="fa-solid fa-hand-pointer text-amber-400 mr-1"></i>
+                            <strong>Клікніть на пристрій або кабель</strong> на схемі, щоб імітувати поломку!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Box -->
+                <div id="topo-info-box" class="p-3.5 bg-slate-800/80 rounded-xl border border-slate-700 text-xs text-slate-300 leading-normal">
+                    <span class="font-bold text-yellow-400 block mb-1"><i class="fa-solid fa-circle-info"></i> Особливість «Зірки»:</span>
+                    Усі ПК підключені окремим кабелем до центрального <strong>Комутатора (Світча)</strong>. Якщо зламається один ПК, інші продовжують працювати!
+                </div>
+            </div>
+
+            <!-- Canvas Visualization -->
+            <div class="lg:col-span-2 glass-panel p-4 rounded-2xl border border-slate-700 flex flex-col justify-between relative min-h-[380px]">
+                <div class="flex items-center justify-between mb-2 z-10">
+                    <span class="text-xs font-bold text-slate-300 uppercase tracking-wide flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                        Інтерактивна схема мережі
+                    </span>
+                    <button onclick="resetTopology()" class="text-xs px-2.5 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-slate-300">
+                        <i class="fa-solid fa-arrows-rotate mr-1"></i> Скинути стан
+                    </button>
+                </div>
+
+                <div class="relative w-full flex-1 bg-slate-950/70 rounded-xl border border-slate-800 overflow-hidden flex items-center justify-center">
+                    <canvas id="topoCanvas" class="w-full h-full cursor-pointer"></canvas>
+                </div>
+
+                <div class="mt-3 flex flex-wrap items-center justify-between text-xs text-slate-400 gap-2 px-1">
+                    <div class="flex items-center gap-4">
+                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500"></span> Працює</span>
+                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-red-500"></span> Поломка</span>
+                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-blue-400"></span> Пакет даних</span>
+                    </div>
+                    <span id="topoStatus" class="font-medium text-emerald-400">Мережа готова до передачі</span>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= TAB 2: SERVER-CLIENT VS PEER-TO-PEER ================= -->
+        <section id="sec-interaction" class="tab-content hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="glass-panel p-5 rounded-2xl border border-slate-700 flex flex-col justify-between gap-4">
+                <div>
+                    <span class="inline-block px-2.5 py-1 text-xs font-bold rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 mb-3">
+                        <i class="fa-solid fa-users mr-1"></i> Способи взаємодії
+                    </span>
+                    <h2 class="text-xl font-heading font-bold text-white mb-2">Як комп'ютери працюють разом?</h2>
+                    
+                    <!-- Mode Switcher -->
+                    <div class="flex bg-slate-900 p-1 rounded-xl border border-slate-700 mb-4">
+                        <button onclick="setInteractionModel('peer')" id="btn-mode-peer" class="flex-1 py-2 text-xs font-bold rounded-lg bg-purple-600 text-white transition">
+                            1. Робоча група (Рівні)
+                        </button>
+                        <button onclick="setInteractionModel('server')" id="btn-mode-server" class="flex-1 py-2 text-xs font-medium text-slate-400 hover:text-white transition">
+                            2. «Сервер - Клієнт»
+                        </button>
+                    </div>
+
+                    <div id="interaction-desc" class="text-xs md:text-sm text-slate-300 leading-relaxed mb-4">
+                        У <strong>Робочій групі</strong> усі комп'ютери є рівноправними і взаємно діляться ресурсами (файлами, принтером) один з одним.
+                    </div>
+
+                    <!-- Admin Rights Simulator (for Server-Client mode) -->
+                    <div id="admin-panel" class="hidden p-3.5 bg-slate-800/90 border border-slate-700 rounded-xl mb-4 space-y-2">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-bold text-yellow-400"><i class="fa-solid fa-user-shield"></i> Права доступу (Адміністратор)</span>
+                            <span class="text-slate-400">Папка «Учні_5_Клас»</span>
+                        </div>
+                        <select id="userAccessSelect" onchange="updateAccessRights()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white">
+                            <option value="read">Читання (Перегляд і копіювання)</option>
+                            <option value="write">Змінення (Редагування та збереження)</option>
+                            <option value="full">Повний доступ (Всі права)</option>
+                            <option value="deny">Доступ заборонено ⛔</option>
+                        </select>
+                    </div>
+
+                    <button onclick="runInteractionAction()" class="w-full py-3 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2 transition active:scale-95">
+                        <i class="fa-solid fa-play"></i>
+                        <span id="btn-interaction-action-text">Запросити файл у сусіднього ПК</span>
+                    </button>
+                </div>
+
+                <div class="p-3 bg-slate-800/80 rounded-xl border border-slate-700 text-xs text-slate-300">
+                    <span class="font-bold text-purple-300 block mb-1"><i class="fa-solid fa-lightbulb"></i> Чи знаєте ви?</span>
+                    Адміністратор мережі у школі (вчитель або ІТ-фахівець) визначає, до яких папок чи сайтів учні мають доступ!
+                </div>
+            </div>
+
+            <!-- Visualization Area -->
+            <div class="lg:col-span-2 glass-panel p-6 rounded-2xl border border-slate-700 flex flex-col justify-between relative min-h-[380px]">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-xs font-bold text-slate-300 uppercase tracking-wide">Симулятор запитів та ресурсів</span>
+                    <span id="interactionBadge" class="px-2.5 py-1 text-xs rounded-lg bg-purple-500/20 text-purple-300 font-semibold border border-purple-500/30">
+                        Режим: Робоча група
+                    </span>
+                </div>
+
+                <!-- Graphic Interactive Stage -->
+                <div id="interactionStage" class="flex-1 bg-slate-950/80 rounded-xl border border-slate-800 p-6 flex items-center justify-around relative overflow-hidden min-h-[280px]">
+                    <!-- Dynamic Javascript Content rendered here -->
+                </div>
+
+                <!-- Console log of server action -->
+                <div id="interactionConsole" class="mt-4 p-3 bg-slate-900 rounded-xl border border-slate-800 font-mono text-xs text-emerald-400">
+                    > Готовий до дій...
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= TAB 3: CLASSROOM NETWORK BUILDER ================= -->
+        <section id="sec-builder" class="tab-content hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="glass-panel p-5 rounded-2xl border border-slate-700 flex flex-col justify-between gap-4">
+                <div>
+                    <span class="inline-block px-2.5 py-1 text-xs font-bold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 mb-3">
+                        <i class="fa-solid fa-screwdriver-wrench mr-1"></i> Завдання з підручника (ст. 53)
+                    </span>
+                    <h2 class="text-xl font-heading font-bold text-white mb-2">Проклади мережу в класі!</h2>
+                    <p class="text-xs text-slate-300 leading-relaxed mb-4">
+                        З'єднайте комп'ютери з центральним **Комутатором (Світчем)** кабелем. Кожна клітинка сітки дорівнює **1 метру**.
+                    </p>
+
+                    <!-- Cable measurement summary -->
+                    <div class="p-4 bg-slate-800/90 rounded-xl border border-slate-700 space-y-2 mb-4">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="text-slate-400">Підключено комп'ютерів:</span>
+                            <span id="connected-count" class="font-bold text-white">0 з 5</span>
+                        </div>
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="text-slate-400">Загальна довжина кабелю:</span>
+                            <span id="cable-length" class="font-bold text-emerald-400 text-sm">0 метрів</span>
+                        </div>
+                        <div class="w-full bg-slate-700 h-2 rounded-full overflow-hidden">
+                            <div id="cable-progress" class="bg-emerald-500 h-full w-0 transition-all duration-300"></div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <button onclick="autoConnectBuilder()" class="w-full py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-xs font-semibold text-white flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-wand-magic-sparkles text-yellow-400"></i> Автоматичне оптимальне з'єднання
+                        </button>
+                        <button onclick="clearBuilderCables()" class="w-full py-2.5 px-4 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-xs font-semibold text-red-300 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-trash-can"></i> Очистити кабелі
+                        </button>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-slate-800/80 rounded-xl border border-slate-700 text-xs text-slate-300">
+                    <span class="font-bold text-emerald-400 block mb-1"><i class="fa-solid fa-ruler"></i> Порада з математики:</span>
+                    Рахуйте відстань по клітинках від Комутатора (внизу ліворуч) до кожного монітора!
+                </div>
+            </div>
+
+            <!-- Grid Classroom Canvas -->
+            <div class="lg:col-span-2 glass-panel p-4 rounded-2xl border border-slate-700 flex flex-col justify-between relative min-h-[400px]">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold text-slate-300 uppercase tracking-wide">Схема кабінету (1 клітинка = 1 метр)</span>
+                    <span class="text-xs text-emerald-400 font-semibold"><i class="fa-solid fa-mouse-pointer"></i> Тисніть на ПК для підключення кабелю</span>
+                </div>
+
+                <div class="relative w-full flex-1 bg-slate-950/90 rounded-xl border border-slate-800 overflow-hidden flex items-center justify-center">
+                    <canvas id="builderCanvas" class="w-full h-full cursor-pointer"></canvas>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= TAB 4: SECURITY & TROUBLESHOOTING ================= -->
+        <section id="sec-security" class="tab-content hidden grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            <!-- PART 1: Password Strength Tester -->
+            <div class="glass-panel p-5 rounded-2xl border border-slate-700 flex flex-col justify-between gap-4">
+                <div>
+                    <span class="inline-block px-2.5 py-1 text-xs font-bold rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 mb-3">
+                        <i class="fa-solid fa-key mr-1"></i> Цифрова безпека (ст. 52)
+                    </span>
+                    <h2 class="text-xl font-heading font-bold text-white mb-2">Перевірка надійності пароля</h2>
+                    <p class="text-xs text-slate-300 leading-relaxed mb-4">
+                        Надійний пароль повинен мати **понад 8 символів**, містити великі й малі літери, цифри та спецсимволи ($!@#%).
+                    </p>
+
+                    <!-- Input -->
+                    <div class="space-y-3 mb-4">
+                        <label class="block text-xs font-semibold text-slate-300">Введіть пароль для перевірки:</label>
+                        <div class="relative">
+                            <input type="text" id="passInput" oninput="testPassword()" placeholder="Наприклад: S3cur3!P@ss2026" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 pr-10 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition">
+                            <i class="fa-solid fa-lock absolute right-3 top-3.5 text-slate-500"></i>
+                        </div>
+                    </div>
+
+                    <!-- Checklist Criteria -->
+                    <div class="space-y-2 mb-4 text-xs">
+                        <div id="check-length" class="flex items-center gap-2 text-slate-500">
+                            <i class="fa-solid fa-circle-xmark"></i> Понад 8 символів
+                        </div>
+                        <div id="check-cases" class="flex items-center gap-2 text-slate-500">
+                            <i class="fa-solid fa-circle-xmark"></i> Великі та малі літери (A-z, А-я)
+                        </div>
+                        <div id="check-numbers" class="flex items-center gap-2 text-slate-500">
+                            <i class="fa-solid fa-circle-xmark"></i> Цифри (0-9)
+                        </div>
+                        <div id="check-symbols" class="flex items-center gap-2 text-slate-500">
+                            <i class="fa-solid fa-circle-xmark"></i> Спеціальні знаки (!@#$%^&*)
+                        </div>
+                    </div>
+
+                    <!-- Output score meter -->
+                    <div class="p-3.5 bg-slate-900 rounded-xl border border-slate-800">
+                        <div class="flex items-center justify-between text-xs mb-1.5">
+                            <span class="text-slate-400">Рівень захисту:</span>
+                            <span id="passScoreText" class="font-bold text-red-400">Слабкий</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
+                            <div id="passScoreBar" class="bg-red-500 h-full w-1/4 transition-all duration-300"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl text-xs text-blue-200">
+                    <i class="fa-solid fa-shield-cat mr-1 text-blue-400"></i>
+                    Ніколи не використовуйте своє ім'я, дату народження чи слово «123456» у паролі!
+                </div>
+            </div>
+
+            <!-- PART 2: Network Troubleshooting Interactive Quest -->
+            <div class="glass-panel p-5 rounded-2xl border border-slate-700 flex flex-col justify-between gap-4">
+                <div>
+                    <span class="inline-block px-2.5 py-1 text-xs font-bold rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 mb-3">
+                        <i class="fa-solid fa-wrench mr-1"></i> Практичні навички (ст. 53)
+                    </span>
+                    <h2 class="text-xl font-heading font-bold text-white mb-2">Діагностика: «Зник інтернет!»</h2>
+                    <p class="text-xs text-slate-300 leading-relaxed mb-4">
+                        У комп'ютері зник мережевий зв'язок. Послідовно виконайте кроки з підручника, щоб повернути мережу!
+                    </p>
+
+                    <!-- Problem Display -->
+                    <div class="p-4 bg-slate-900/90 rounded-xl border border-slate-800 flex items-center gap-4 mb-4">
+                        <div id="troubleIcon" class="w-12 h-12 rounded-xl bg-red-500/20 border border-red-500/40 text-red-400 flex items-center justify-center text-2xl">
+                            <i class="fa-solid fa-wifi font-bold"></i>
+                        </div>
+                        <div>
+                            <div id="troubleTitle" class="font-bold text-sm text-white">Стан: Зв'язок відсутній ❌</div>
+                            <div id="troubleSub" class="text-xs text-slate-400">Значок операційної системи показує відключення</div>
+                        </div>
+                    </div>
+
+                    <!-- Steps Buttons -->
+                    <div class="space-y-2 mb-2">
+                        <button onclick="fixStep(1)" id="fix-btn-1" class="w-full py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs text-left text-slate-200 flex items-center justify-between transition">
+                            <span>1. Перевірити чи підключений мережевий кабель</span>
+                            <i id="fix-check-1" class="fa-solid fa-circle text-slate-600"></i>
+                        </button>
+                        <button onclick="fixStep(2)" id="fix-btn-2" class="w-full py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs text-left text-slate-200 flex items-center justify-between transition">
+                            <span>2. Перевірити чи ввімкнений роутер</span>
+                            <i id="fix-check-2" class="fa-solid fa-circle text-slate-600"></i>
+                        </button>
+                        <button onclick="fixStep(3)" id="fix-btn-3" class="w-full py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs text-left text-slate-200 flex items-center justify-between transition">
+                            <span>3. Перезавантажити роутер та Wi-Fi адаптер</span>
+                            <i id="fix-check-3" class="fa-solid fa-circle text-slate-600"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="troubleSuccess" class="hidden p-3 bg-emerald-500/20 border border-emerald-500/40 rounded-xl text-xs text-emerald-300 font-medium">
+                    🎉 Вітаємо! Мережу відновлено! Інтернет працює чудово!
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-950 border-t border-slate-800 py-3 mt-6 text-center text-xs text-slate-500">
+        <p>Наочний навчальний інтерактив розроблено за програмою НУШ (Інформатика 5 клас, підручник В. Д. Руденко та ін.)</p>
+    </footer>
+
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- SOUND EFFECTS (Web Audio API) ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(freq = 440, type = 'sine', duration = 0.1) {
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
+        }
+
+        // --- TAB SWITCHING ---
+        function switchTab(tabId) {
+            playSound(520, 'sine', 0.08);
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white', 'shadow-md');
+                btn.classList.add('text-slate-300');
+            });
+
+            document.getElementById('sec-' + tabId).classList.remove('hidden');
+            const activeBtn = document.getElementById('tab-' + tabId);
+            activeBtn.classList.add('bg-blue-600', 'text-white', 'shadow-md');
+            activeBtn.classList.remove('text-slate-300');
+
+            if (tabId === 'topologies') resizeTopoCanvas();
+            if (tabId === 'interaction') renderInteractionStage();
+            if (tabId === 'builder') initBuilderCanvas();
+        }
+
+        // ================= TAB 1: TOPOLOGIES LOGIC =================
+        let topoType = 'star';
+        let topoNodes = [];
+        let topoLinks = [];
+        let topoPackets = [];
+        const canvas = document.getElementById('topoCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeTopoCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            buildTopologyData();
+        }
+
+        function setTopology(type) {
+            playSound(600, 'triangle', 0.1);
+            topoType = type;
+            document.querySelectorAll('.topo-select-btn').forEach(b => {
+                b.classList.remove('border-blue-500', 'bg-blue-600/30', 'text-white');
+                b.classList.add('border-slate-700', 'bg-slate-800', 'text-slate-300');
+            });
+            const btn = document.getElementById('btn-topo-' + type);
+            btn.classList.add('border-blue-500', 'bg-blue-600/30', 'text-white');
+
+            const infoBox = document.getElementById('topo-info-box');
+            if (type === 'star') {
+                infoBox.innerHTML = `<span class="font-bold text-yellow-400 block mb-1"><i class="fa-solid fa-circle-info"></i> Топологія «Зірка»:</span>Усі ПК приєднані до центрального <strong>Комутатора (Світча)</strong>. Найпопулярніша схема у школах та офісах.`;
+            } else if (type === 'bus') {
+                infoBox.innerHTML = `<span class="font-bold text-blue-400 block mb-1"><i class="fa-solid fa-circle-info"></i> Топологія «Шина»:</span>Усі ПК підключені до одного головного кабелю. Якщо кабель розірветься — мережа розділиться!`;
+            } else if (type === 'ring') {
+                infoBox.innerHTML = `<span class="font-bold text-emerald-400 block mb-1"><i class="fa-solid fa-circle-info"></i> Топологія «Кільце»:</span>Комп'ютери з'єднані послідовно у замкнене коло. Сигнал ходить за годинниковою стрілкою.`;
+            } else if (type === 'tree') {
+                infoBox.innerHTML = `<span class="font-bold text-purple-400 block mb-1"><i class="fa-solid fa-circle-info"></i> Топологія «Дерево»:</span>Ієрархічне об'єднання кількох локальних мереж через комутатори.`;
+            }
+
+            buildTopologyData();
+        }
+
+        function buildTopologyData() {
+            topoNodes = [];
+            topoLinks = [];
+            topoPackets = [];
+            const w = canvas.width;
+            const h = canvas.height;
+            const cx = w / 2;
+            const cy = h / 2;
+
+            if (topoType === 'star') {
+                // Central Switch
+                topoNodes.push({ id: 0, label: 'Світч', type: 'switch', x: cx, y: cy, broken: false });
+                const count = 5;
+                for (let i = 0; i < count; i++) {
+                    const angle = (i * 2 * Math.PI) / count - Math.PI / 2;
+                    const rx = cx + Math.cos(angle) * (Math.min(w, h) * 0.33);
+                    const ry = cy + Math.sin(angle) * (Math.min(w, h) * 0.33);
+                    topoNodes.push({ id: i + 1, label: 'ПК ' + (i + 1), type: 'pc', x: rx, y: ry, broken: false });
+                    topoLinks.push({ from: 0, to: i + 1, broken: false });
+                }
+            } else if (topoType === 'bus') {
+                const count = 5;
+                const startX = w * 0.15;
+                const endX = w * 0.85;
+                const busY = cy;
+                // Bus line
+                for (let i = 0; i < count; i++) {
+                    const x = startX + (i * (endX - startX)) / (count - 1);
+                    const y = i % 2 === 0 ? busY - h * 0.22 : busY + h * 0.22;
+                    topoNodes.push({ id: i, label: 'ПК ' + (i + 1), type: 'pc', x: x, y: y, broken: false });
+                }
+            } else if (topoType === 'ring') {
+                const count = 5;
+                for (let i = 0; i < count; i++) {
+                    const angle = (i * 2 * Math.PI) / count - Math.PI / 2;
+                    const rx = cx + Math.cos(angle) * (Math.min(w, h) * 0.32);
+                    const ry = cy + Math.sin(angle) * (Math.min(w, h) * 0.32);
+                    topoNodes.push({ id: i, label: 'ПК ' + (i + 1), type: 'pc', x: rx, y: ry, broken: false });
+                }
+                for (let i = 0; i < count; i++) {
+                    topoLinks.push({ from: i, to: (i + 1) % count, broken: false });
+                }
+            } else if (topoType === 'tree') {
+                // Main Switch
+                topoNodes.push({ id: 0, label: 'Головний Світч', type: 'switch', x: cx, y: h * 0.2, broken: false });
+                // Sub Switches
+                topoNodes.push({ id: 1, label: 'Світч А', type: 'switch', x: cx - w * 0.25, y: h * 0.5, broken: false });
+                topoNodes.push({ id: 2, label: 'Світч Б', type: 'switch', x: cx + w * 0.25, y: h * 0.5, broken: false });
+                topoLinks.push({ from: 0, to: 1, broken: false }, { from: 0, to: 2, broken: false });
+
+                // PCs
+                topoNodes.push({ id: 3, label: 'ПК 1', type: 'pc', x: cx - w * 0.35, y: h * 0.8, broken: false });
+                topoNodes.push({ id: 4, label: 'ПК 2', type: 'pc', x: cx - w * 0.15, y: h * 0.8, broken: false });
+                topoNodes.push({ id: 5, label: 'ПК 3', type: 'pc', x: cx + w * 0.15, y: h * 0.8, broken: false });
+                topoNodes.push({ id: 6, label: 'ПК 4', type: 'pc', x: cx + w * 0.35, y: h * 0.8, broken: false });
+                topoLinks.push({ from: 1, to: 3, broken: false }, { from: 1, to: 4, broken: false });
+                topoLinks.push({ from: 2, to: 5, broken: false }, { from: 2, to: 6, broken: false });
+            }
+            drawTopoCanvas();
+        }
+
+        function sendPacketTopology() {
+            playSound(800, 'sine', 0.15);
+            topoPackets = [];
+            if (topoType === 'star') {
+                if (!topoNodes[0].broken && !topoNodes[1].broken && !topoLinks[0].broken) {
+                    topoPackets.push({ fromNode: 1, toNode: 0, progress: 0, targetFinal: 4 });
+                }
+            } else if (topoType === 'bus') {
+                topoPackets.push({ fromNode: 0, toNode: 3, progress: 0, targetFinal: 3 });
+            } else if (topoType === 'ring') {
+                topoPackets.push({ fromNode: 0, toNode: 1, progress: 0, targetFinal: 3 });
+            } else if (topoType === 'tree') {
+                topoPackets.push({ fromNode: 3, toNode: 1, progress: 0, targetFinal: 6 });
+            }
+        }
+
+        function resetTopology() {
+            playSound(400, 'sine', 0.1);
+            buildTopologyData();
+            document.getElementById('topoStatus').innerText = 'Мережу відновлено';
+            document.getElementById('topoStatus').className = 'font-medium text-emerald-400';
+        }
+
+        // Canvas click handler (toggle break node)
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            topoNodes.forEach(node => {
+                const dist = Math.hypot(node.x - x, node.y - y);
+                if (dist < 25) {
+                    node.broken = !node.broken;
+                    playSound(node.broken ? 300 : 700, 'square', 0.12);
+                }
+            });
+
+            // Update status text
+            const hasBroken = topoNodes.some(n => n.broken);
+            const statusEl = document.getElementById('topoStatus');
+            if (hasBroken) {
+                statusEl.innerText = 'Увага: Є пошкоджені пристрої на схемі!';
+                statusEl.className = 'font-medium text-amber-400';
+            } else {
+                statusEl.innerText = 'Мережа працює справно';
+                statusEl.className = 'font-medium text-emerald-400';
+            }
+        });
+
+        function drawTopoCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 1. Draw Links
+            if (topoType === 'bus') {
+                // Main bus line
+                const startX = canvas.width * 0.15;
+                const endX = canvas.width * 0.85;
+                const busY = canvas.height / 2;
+                ctx.beginPath();
+                ctx.moveTo(startX, busY);
+                ctx.lineTo(endX, busY);
+                ctx.strokeStyle = '#38bdf8';
+                ctx.lineWidth = 6;
+                ctx.stroke();
+
+                // Drop lines
+                topoNodes.forEach(node => {
+                    ctx.beginPath();
+                    ctx.moveTo(node.x, busY);
+                    ctx.lineTo(node.x, node.y);
+                    ctx.strokeStyle = node.broken ? '#ef4444' : '#64748b';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([4, 4]);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                });
+            } else {
+                topoLinks.forEach(link => {
+                    const n1 = topoNodes[link.from];
+                    const n2 = topoNodes[link.to];
+                    if (!n1 || !n2) return;
+
+                    ctx.beginPath();
+                    ctx.moveTo(n1.x, n1.y);
+                    ctx.lineTo(n2.x, n2.y);
+                    const isBroken = n1.broken || n2.broken || link.broken;
+                    ctx.strokeStyle = isBroken ? '#ef4444' : '#3b82f6';
+                    ctx.lineWidth = isBroken ? 2 : 3;
+                    if (isBroken) ctx.setLineDash([5, 5]);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                });
+            }
+
+            // 2. Update and Draw Packets
+            topoPackets.forEach((p, idx) => {
+                const n1 = topoNodes[p.fromNode];
+                const n2 = topoNodes[p.toNode];
+                if (!n1 || !n2 || n1.broken || n2.broken) {
+                    topoPackets.splice(idx, 1);
+                    return;
+                }
+
+                p.progress += 0.02;
+                const px = n1.x + (n2.x - n1.x) * p.progress;
+                const py = n1.y + (n2.y - n1.y) * p.progress;
+
+                ctx.beginPath();
+                ctx.arc(px, py, 7, 0, Math.PI * 2);
+                ctx.fillStyle = '#60a5fa';
+                ctx.shadowColor = '#3b82f6';
+                ctx.shadowBlur = 10;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                if (p.progress >= 1) {
+                    // Packet arrived at next node
+                    if (p.toNode === p.targetFinal) {
+                        playSound(1000, 'sine', 0.2);
+                        topoPackets.splice(idx, 1);
+                    } else if (topoType === 'star' && p.toNode === 0) {
+                        // Switch redirects to target PC
+                        const targetNode = topoNodes[p.targetFinal];
+                        if (targetNode && !targetNode.broken) {
+                            topoPackets.push({ fromNode: 0, toNode: p.targetFinal, progress: 0, targetFinal: p.targetFinal });
+                        }
+                        topoPackets.splice(idx, 1);
+                    } else if (topoType === 'tree' && p.toNode === 1) {
+                        topoPackets.push({ fromNode: 1, toNode: 0, progress: 0, targetFinal: p.targetFinal });
+                        topoPackets.splice(idx, 1);
+                    } else if (topoType === 'tree' && p.toNode === 0) {
+                        topoPackets.push({ fromNode: 0, toNode: 2, progress: 0, targetFinal: p.targetFinal });
+                        topoPackets.splice(idx, 1);
+                    } else if (topoType === 'tree' && p.toNode === 2) {
+                        topoPackets.push({ fromNode: 2, toNode: p.targetFinal, progress: 0, targetFinal: p.targetFinal });
+                        topoPackets.splice(idx, 1);
+                    } else if (topoType === 'ring') {
+                        const next = (p.toNode + 1) % topoNodes.length;
+                        topoPackets.push({ fromNode: p.toNode, toNode: next, progress: 0, targetFinal: p.targetFinal });
+                        topoPackets.splice(idx, 1);
+                    }
+                }
+            });
+
+            // 3. Draw Nodes
+            topoNodes.forEach(node => {
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, 22, 0, Math.PI * 2);
+                ctx.fillStyle = node.broken ? '#7f1d1d' : (node.type === 'switch' ? '#1e1b4b' : '#0f172a');
+                ctx.strokeStyle = node.broken ? '#ef4444' : (node.type === 'switch' ? '#818cf8' : '#38bdf8');
+                ctx.lineWidth = 3;
+                ctx.fill();
+                ctx.stroke();
+
+                // Icon / Text inside node
+                ctx.font = '11px Comfortaa';
+                ctx.fillStyle = node.broken ? '#fca5a5' : '#ffffff';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(node.broken ? '❌' : (node.type === 'switch' ? '🔀' : '💻'), node.x, node.y - 2);
+
+                // Label below node
+                ctx.font = '10px Inter';
+                ctx.fillStyle = '#94a3b8';
+                ctx.fillText(node.label, node.x, node.y + 32);
+            });
+
+            requestAnimationFrame(drawTopoCanvas);
+        }
+
+
+        // ================= TAB 2: SERVER-CLIENT VS PEER INTERACTION =================
+        let interactionMode = 'peer'; // 'peer' or 'server'
+        let currentAccessRights = 'read';
+
+        function setInteractionModel(mode) {
+            playSound(550, 'sine', 0.1);
+            interactionMode = mode;
+            const btnPeer = document.getElementById('btn-mode-peer');
+            const btnServer = document.getElementById('btn-mode-server');
+            const badge = document.getElementById('interactionBadge');
+            const desc = document.getElementById('interaction-desc');
+            const adminPanel = document.getElementById('admin-panel');
+            const actionBtnText = document.getElementById('btn-interaction-action-text');
+
+            if (mode === 'peer') {
+                btnPeer.className = 'flex-1 py-2 text-xs font-bold rounded-lg bg-purple-600 text-white transition';
+                btnServer.className = 'flex-1 py-2 text-xs font-medium text-slate-400 hover:text-white transition';
+                badge.innerText = 'Режим: Робоча група';
+                badge.className = 'px-2.5 py-1 text-xs rounded-lg bg-purple-500/20 text-purple-300 font-semibold border border-purple-500/30';
+                desc.innerHTML = 'У <strong>Робочій групі</strong> усі комп\'ютери є рівноправними і взаємно діляться ресурсами (файлами, принтером) один з одним без центрального головного ПК.';
+                adminPanel.classList.add('hidden');
+                actionBtnText.innerText = 'Запросити файл у ПК-2';
+            } else {
+                btnServer.className = 'flex-1 py-2 text-xs font-bold rounded-lg bg-purple-600 text-white transition';
+                btnPeer.className = 'flex-1 py-2 text-xs font-medium text-slate-400 hover:text-white transition';
+                badge.innerText = 'Режим: Сервер - Клієнти';
+                badge.className = 'px-2.5 py-1 text-xs rounded-lg bg-blue-500/20 text-blue-300 font-semibold border border-blue-500/30';
+                desc.innerHTML = 'У системі <strong>«Сервер - Клієнт»</strong> один потужний комп\'ютер (Сервер) зберігає всі спільно використовувані файли та надає послуги іншим комп\'ютерам (Клієнтам).';
+                adminPanel.classList.remove('hidden');
+                actionBtnText.innerText = 'Надіслати запит на Сервер';
+            }
+            renderInteractionStage();
+        }
+
+        function updateAccessRights() {
+            currentAccessRights = document.getElementById('userAccessSelect').value;
+            playSound(500, 'sine', 0.08);
+            logConsole(`Адміністратор змінив права доступу на: "${currentAccessRights.toUpperCase()}"`);
+        }
+
+        function renderInteractionStage() {
+            const stage = document.getElementById('interactionStage');
+            if (interactionMode === 'peer') {
+                stage.innerHTML = `
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="w-16 h-16 rounded-2xl bg-slate-900 border-2 border-purple-500 flex items-center justify-center text-2xl shadow-lg shadow-purple-500/20">💻</div>
+                        <span class="text-xs font-bold text-white">ПК-1 (Ваш ПК)</span>
+                    </div>
+
+                    <div id="interactionLine" class="flex-1 h-0.5 bg-dashed border-t-2 border-dashed border-purple-500/50 mx-4 relative flex items-center justify-center">
+                        <span id="packetIcon" class="hidden text-xl absolute">📁</span>
+                    </div>
+
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="w-16 h-16 rounded-2xl bg-slate-900 border-2 border-purple-500 flex items-center justify-center text-2xl shadow-lg shadow-purple-500/20">💻</div>
+                        <span class="text-xs font-bold text-white">ПК-2 (Сусід)</span>
+                    </div>
+                `;
+            } else {
+                stage.innerHTML = `
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="w-16 h-16 rounded-2xl bg-slate-900 border-2 border-blue-400 flex items-center justify-center text-2xl">💻</div>
+                        <span class="text-xs font-bold text-white">Клієнт (Учень)</span>
+                    </div>
+
+                    <div id="interactionLine" class="flex-1 h-0.5 border-t-2 border-blue-500/50 mx-4 relative flex items-center justify-center">
+                        <span id="packetIcon" class="hidden text-xl absolute">📄</span>
+                    </div>
+
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="w-20 h-20 rounded-2xl bg-gradient-to-b from-indigo-950 to-slate-900 border-2 border-amber-400 flex flex-col items-center justify-center text-2xl shadow-xl shadow-amber-500/20 relative">
+                            🖥️
+                            <span class="absolute -top-2 bg-amber-400 text-slate-950 text-[9px] font-extrabold px-1.5 py-0.5 rounded">СЕРВЕР</span>
+                        </div>
+                        <span class="text-xs font-bold text-amber-300">Шкільний Сервер</span>
+                    </div>
+                `;
+            }
+        }
+
+        function runInteractionAction() {
+            playSound(750, 'sine', 0.1);
+            const packet = document.getElementById('packetIcon');
+            if (!packet) return;
+
+            packet.classList.remove('hidden');
+            packet.style.left = '0%';
+
+            let pos = 0;
+            const interval = setInterval(() => {
+                pos += 5;
+                packet.style.left = pos + '%';
+                if (pos >= 90) {
+                    clearInterval(interval);
+                    packet.classList.add('hidden');
+
+                    if (interactionMode === 'peer') {
+                        playSound(900, 'sine', 0.15);
+                        logConsole('Успіх: ПК-2 передав файл "Презентація.pptx" на ваш ПК-1.');
+                    } else {
+                        if (currentAccessRights === 'deny') {
+                            playSound(250, 'sawtooth', 0.2);
+                            logConsole('⛔ ПОМИЛКА: Адміністратор заборонив вам доступ до Сервера!');
+                        } else if (currentAccessRights === 'read') {
+                            playSound(900, 'sine', 0.15);
+                            logConsole('✅ Доступ тільки для читання: Файл успішно завантажено з Сервера.');
+                        } else if (currentAccessRights === 'write' || currentAccessRights === 'full') {
+                            playSound(950, 'sine', 0.2);
+                            logConsole('✅ Повний доступ: Ви завантажили та зберегли оновлений документ на Сервері!');
+                        }
+                    }
+                }
+            }, 30);
+        }
+
+        function logConsole(msg) {
+            const el = document.getElementById('interactionConsole');
+            el.innerText = '> ' + msg;
+        }
+
+
+        // ================= TAB 3: CLASSROOM BUILDER LOGIC =================
+        let builderCanvas = document.getElementById('builderCanvas');
+        let builderCtx = builderCanvas.getContext('2d');
+        let connectedDevices = [false, false, false, false, false];
+
+        function initBuilderCanvas() {
+            const rect = builderCanvas.parentElement.getBoundingClientRect();
+            builderCanvas.width = rect.width;
+            builderCanvas.height = rect.height;
+            drawBuilderCanvas();
+        }
+
+        function drawBuilderCanvas() {
+            const w = builderCanvas.width;
+            const h = builderCanvas.height;
+            builderCtx.clearRect(0, 0, w, h);
+
+            // Draw 1-meter Grid
+            const cols = 8;
+            const rows = 5;
+            const cellW = w / cols;
+            const cellH = h / rows;
+
+            builderCtx.strokeStyle = '#334155';
+            builderCtx.lineWidth = 1;
+            builderCtx.setLineDash([2, 4]);
+
+            for (let i = 0; i <= cols; i++) {
+                builderCtx.beginPath();
+                builderCtx.moveTo(i * cellW, 0);
+                builderCtx.lineTo(i * cellW, h);
+                builderCtx.stroke();
+            }
+            for (let j = 0; j <= rows; j++) {
+                builderCtx.beginPath();
+                builderCtx.moveTo(0, j * cellH);
+                builderCtx.lineTo(w, j * cellH);
+                builderCtx.stroke();
+            }
+            builderCtx.setLineDash([]);
+
+            // Switch Position (Bottom-Left)
+            const switchX = cellW * 0.8;
+            const switchY = cellH * 4.2;
+
+            // Compute PC positions
+            const pcPositions = [
+                { x: cellW * 2.5, y: cellH * 0.8 },
+                { x: cellW * 3.8, y: cellH * 0.8 },
+                { x: cellW * 5.1, y: cellH * 0.8 },
+                { x: cellW * 6.4, y: cellH * 0.8 },
+                { x: cellW * 7.2, y: cellH * 2.5 }
+            ];
+
+            // Draw Cables if connected
+            let totalMeters = 0;
+            let count = 0;
+
+            pcPositions.forEach((pc, idx) => {
+                if (connectedDevices[idx]) {
+                    count++;
+                    // Manhattan / grid cable routing
+                    builderCtx.beginPath();
+                    builderCtx.moveTo(switchX, switchY);
+                    builderCtx.lineTo(switchX, pc.y);
+                    builderCtx.lineTo(pc.x, pc.y);
+                    builderCtx.strokeStyle = '#10b981';
+                    builderCtx.lineWidth = 3;
+                    builderCtx.stroke();
+
+                    // Calculate distance in grid units (meters)
+                    const distX = Math.abs(pc.x - switchX) / cellW;
+                    const distY = Math.abs(pc.y - switchY) / cellH;
+                    totalMeters += Math.round(distX + distY);
+                }
+            });
+
+            // Update DOM counters
+            document.getElementById('connected-count').innerText = `${count} з 5`;
+            document.getElementById('cable-length').innerText = `${totalMeters} метрів`;
+            document.getElementById('cable-progress').style.width = `${(count / 5) * 100}%`;
+
+            // Draw Switch Icon
+            builderCtx.fillStyle = '#1e293b';
+            builderCtx.strokeStyle = '#f59e0b';
+            builderCtx.lineWidth = 2;
+            builderCtx.fillRect(switchX - 25, switchY - 18, 50, 36);
+            builderCtx.strokeRect(switchX - 25, switchY - 18, 50, 36);
+
+            builderCtx.font = '10px Inter';
+            builderCtx.fillStyle = '#f59e0b';
+            builderCtx.textAlign = 'center';
+            builderCtx.fillText('Світч', switchX, switchY + 4);
+
+            // Draw PCs
+            pcPositions.forEach((pc, idx) => {
+                const isConn = connectedDevices[idx];
+                builderCtx.fillStyle = isConn ? '#064e3b' : '#0f172a';
+                builderCtx.strokeStyle = isConn ? '#10b981' : '#64748b';
+                builderCtx.lineWidth = 2;
+
+                builderCtx.fillRect(pc.x - 22, pc.y - 18, 44, 36);
+                builderCtx.strokeRect(pc.x - 22, pc.y - 18, 44, 36);
+
+                builderCtx.font = '11px Comfortaa';
+                builderCtx.fillStyle = '#ffffff';
+                builderCtx.textAlign = 'center';
+                builderCtx.fillText(`ПК-${idx + 1}`, pc.x, pc.y + 4);
+            });
+        }
+
+        builderCanvas.addEventListener('click', (e) => {
+            const rect = builderCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const w = builderCanvas.width;
+            const h = builderCanvas.height;
+            const cellW = w / 8;
+            const cellH = h / 5;
+
+            const pcPositions = [
+                { x: cellW * 2.5, y: cellH * 0.8 },
+                { x: cellW * 3.8, y: cellH * 0.8 },
+                { x: cellW * 5.1, y: cellH * 0.8 },
+                { x: cellW * 6.4, y: cellH * 0.8 },
+                { x: cellW * 7.2, y: cellH * 2.5 }
+            ];
+
+            pcPositions.forEach((pc, idx) => {
+                if (Math.hypot(pc.x - x, pc.y - y) < 30) {
+                    connectedDevices[idx] = !connectedDevices[idx];
+                    playSound(connectedDevices[idx] ? 650 : 350, 'sine', 0.1);
+                    drawBuilderCanvas();
+                }
+            });
+        });
+
+        function autoConnectBuilder() {
+            playSound(850, 'sine', 0.15);
+            connectedDevices = [true, true, true, true, true];
+            drawBuilderCanvas();
+        }
+
+        function clearBuilderCables() {
+            playSound(300, 'sine', 0.1);
+            connectedDevices = [false, false, false, false, false];
+            drawBuilderCanvas();
+        }
+
+
+        // ================= TAB 4: PASSWORD & TROUBLESHOOTING LOGIC =================
+        function testPassword() {
+            const val = document.getElementById('passInput').value;
+
+            const hasLen = val.length >= 8;
+            const hasCases = /[a-z]/i.test(val) && /[A-Z]/i.test(val);
+            const hasNum = /[0-9]/.test(val);
+            const hasSym = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(val);
+
+            updateCheckIcon('check-length', hasLen, 'Понад 8 символів');
+            updateCheckIcon('check-cases', hasCases, 'Великі та малі літери');
+            updateCheckIcon('check-numbers', hasNum, 'Цифри (0-9)');
+            updateCheckIcon('check-symbols', hasSym, 'Спеціальні знаки (!@#$%)');
+
+            let score = 0;
+            if (hasLen) score += 25;
+            if (hasCases) score += 25;
+            if (hasNum) score += 25;
+            if (hasSym) score += 25;
+
+            const scoreBar = document.getElementById('passScoreBar');
+            const scoreText = document.getElementById('passScoreText');
+
+            scoreBar.style.width = score + '%';
+            if (score <= 25) {
+                scoreBar.className = 'bg-red-500 h-full transition-all duration-300';
+                scoreText.innerText = 'Слабкий (Небезпечно)';
+                scoreText.className = 'font-bold text-red-400';
+            } else if (score <= 75) {
+                scoreBar.className = 'bg-amber-500 h-full transition-all duration-300';
+                scoreText.innerText = 'Середній';
+                scoreText.className = 'font-bold text-amber-400';
+            } else {
+                scoreBar.className = 'bg-emerald-500 h-full transition-all duration-300';
+                scoreText.innerText = 'Надійний Пароль! 🛡️';
+                scoreText.className = 'font-bold text-emerald-400';
+            }
+        }
+
+        function updateCheckIcon(id, isOk, text) {
+            const el = document.getElementById(id);
+            if (isOk) {
+                el.className = 'flex items-center gap-2 text-emerald-400 font-medium';
+                el.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${text}`;
+            } else {
+                el.className = 'flex items-center gap-2 text-slate-500';
+                el.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> ${text}`;
+            }
+        }
+
+        // Troubleshooting Quest steps
+        let fixSteps = [false, false, false];
+
+        function fixStep(stepNum) {
+            playSound(600 + stepNum * 100, 'sine', 0.1);
+            fixSteps[stepNum - 1] = true;
+
+            const checkIcon = document.getElementById(`fix-check-${stepNum}`);
+            checkIcon.className = 'fa-solid fa-circle-check text-emerald-400';
+
+            if (fixSteps.every(Boolean)) {
+                playSound(900, 'triangle', 0.25);
+                document.getElementById('troubleTitle').innerText = 'Стан: Мережу підключено! ✅';
+                document.getElementById('troubleSub').innerText = 'Значок Wi-Fi/Мережі активний. Зв\'язок стабільний.';
+                document.getElementById('troubleIcon').className = 'w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center text-2xl';
+                document.getElementById('troubleSuccess').classList.remove('hidden');
+            }
+        }
+
+        // INITIALIZATION
+        window.addEventListener('load', () => {
+            resizeTopoCanvas();
+            window.addEventListener('resize', () => {
+                resizeTopoCanvas();
+                if (document.getElementById('sec-builder').classList.contains('hidden') === false) {
+                    initBuilderCanvas();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
